@@ -1,6 +1,6 @@
 from __future__ import annotations
 from constants import CellStatus, HitStatus
-from ship import Ship, ShipOne, ShipTwo, ShipThree
+import ship
 
 
 class Board:
@@ -23,20 +23,28 @@ class Board:
         pass
 
     @property
-    def Ships(self) -> list(Ship):
+    def ships(self) -> list(ship.Ship):
         return self._ships
 
     @property
-    def Kills(self) -> list(Ship):
+    def kills(self) -> list(ship.Ship):
         return self._kill_ships
 
     def print(self):
-        pass
+        line = "y|x"
 
-    def Hit(self, cell: tuple) -> HitStatus:
-        if not self.check_cell(cell):
-            raise Exception
+        for x in range(Board.MAX_WIDTH):
+            line += f"\t{x}"
 
+        print(line)
+
+        for y in range(Board.MAX_HEIGHT):
+            line = f"{y}"
+            for x in range(Board.MAX_WIDTH):
+                line += f"\t{self._board[y][x].value}"
+            print(line)
+
+    def hit(self, cell: tuple) -> HitStatus:
         val_cell = self._get_val_cell(cell)
         new_val = HitStatus.MISS
 
@@ -48,12 +56,12 @@ class Board:
             self.change_cell(cell, CellStatus.MISS)
             return HitStatus.MISS
         if val_cell == CellStatus.SHIP:
-            for ship in self.ships:
-                if cell in ship.get_coordinates():
-                    new_val = ship.set_his(cell)
+            for shp in self.ships:
+                if cell in shp.get_coordinates():
+                    new_val = shp.set_his(cell)
                     if new_val == HitStatus.KILL:
-                        self._kill_ships.append(ship)
-                        self._ships.remove(ship)
+                        self._kill_ships.append(shp)
+                        self._ships.remove(shp)
                         self.change_cell(cell, CellStatus.HIT)
                     if new_val == HitStatus.HIT:
                         self.change_cell(cell, CellStatus.HIT)
@@ -63,31 +71,27 @@ class Board:
     def _get_val_cell(self, cell: tuple) -> CellStatus:
         return self._board[cell[0]][cell[1]]
 
-    @Ships.setter
-    def ships(self, ships: list(Ship)):
-        if self._check_ships(ships):
+    def set_ships(self, ships: list(ship.Ship)):
+        if self.check_ships(ships):
             self._ships.extend(ships)
 
-            for ship in ships:
-                for coordinate in ship.get_coordinates():
+            for shp in ships:
+                if isinstance(shp, ship.ShipOne):
+                    self._count_ship_one += 1
+                if isinstance(shp, ship.ShipTwo):
+                    self._count_ship_two += 1
+                if isinstance(shp, ship.ShipThree):
+                    self._count_ship_three += 1
+
+                for coordinate in shp.get_coordinates():
                     self.change_cell(coordinate, CellStatus.SHIP)
+        else:
+            raise Exception
 
     def check_count_ships(self) -> bool:
-        count_one = 0
-        count_two = 0
-        count_three = 0
-
-        for ship in self.ships:
-            if ship is ShipOne:
-                count_one += 1
-            if ship is ShipTwo:
-                count_two += 1
-            if ship is ShipThree:
-                count_three += 1
-
-        return all([count_one != Board.COUNT_SHIP_ONE,
-                    count_two != Board.COUNT_SHIP_TWO,
-                    count_three != Board.COUNT_SHIP_THREE])
+        return all([self._count_ship_one != Board.COUNT_SHIP_ONE,
+                    self._count_ship_two != Board.COUNT_SHIP_TWO,
+                    self._count_ship_three != Board.COUNT_SHIP_THREE])
 
     def __init__(self):
         self._board = [[CellStatus.EMPTY for y in range(Board.MAX_HEIGHT)] for x in range(Board.MAX_WIDTH)]
@@ -96,12 +100,6 @@ class Board:
     def change_cell(self, coordinate: tuple, val: CellStatus):
         if self.check_coordinate(coordinate):
             self._board[coordinate[0]][coordinate[1]] = val
-
-    def check_cell(self, coordinate: tuple) -> bool:
-        if self._board[coordinate[0]][coordinate[1]] == CellStatus.EMPTY:
-            return True
-        else:
-            return False
 
     def get_empty_cells(self) -> list(tuple):
         empty = []
@@ -122,22 +120,28 @@ class Board:
         for y in range(Board.MAX_HEIGHT):
             yield self._board[y]
 
-    def _check_ships(self, ships: list(Ship)) -> bool:
+    def check_ships(self, ships: list(ship.Ship)) -> bool:
+        adjacents_board = set()
+        for shp in self._ships:
+            adjacents_board = adjacents_board.union(shp.get_adjacent())
+            adjacents_board = adjacents_board.union(shp.get_coordinates())
+
         adjacents = set()
+        for check_shp in ships:
+            adjacents.clear()
 
-        for ship in ships:
-            adjacents.union(ship.get_adjacent())
+            for shp in ships:
+                if check_shp != shp:
+                    adjacents = adjacents.union(shp.get_adjacent())
+                    adjacents = adjacents.union(shp.get_coordinates())
 
-        for ship in self.ships:
-            adjacents.union(ship.get_adjacent())
+            adjacents = adjacents.union(adjacents_board)
+            coordinates = check_shp.get_coordinates()
 
-        for ship in ships:
-            coordinates = ship.get_coordinates()
+            if adjacents.issuperset(coordinates):
+                return False
 
-            if adjacents in coordinates:
-                return True
-
-        return False
+        return True
 
     @staticmethod
     def check_coordinate(coordinate: tuple) -> bool:
@@ -196,4 +200,15 @@ class Board:
 
 
 if __name__ == "__main__":
-    pass
+    board = Board()
+    ships = [ship.ShipTwo([(0, 0), (0, 1)]), ship.ShipOne([(1, 2)])]
+    try:
+        board.set_ships(ships)
+    except Exception:
+        pass
+    board.print()
+
+    print("---")
+
+    board.hit((0, 0))
+    board.print()
