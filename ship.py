@@ -1,7 +1,7 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
 from constants import HitStatus
-from board import Board
+import board
 
 
 class Ship(ABC):
@@ -13,7 +13,7 @@ class Ship(ABC):
         self.__coordinates = {}
 
         for coordinate in coordinates:
-            if not Board.check_coordinate(coordinate):
+            if not board.Board.check_coordinate(coordinate):
                 raise Exception
 
             self.__coordinates[coordinate] = True
@@ -42,7 +42,7 @@ class Ship(ABC):
         coordinates = []
 
         for coordinate in self.__coordinates.keys():
-            coordinates.extend(list(Board.next_adjacent(coordinate)))
+            coordinates.extend(list(board.Board.next_adjacent(coordinate)))
 
         return set(coordinates) - self.get_coordinates()
 
@@ -53,42 +53,42 @@ class ShipOne(Ship):
             raise Exception
 
     def __str__(self):
-        return f'Однопалубник ${self.__coordinates}'
+        return f'Однопалубник {self.get_coordinates()}'
 
 class ShipTwo(Ship):
     def check_create(self, coordinates: list):
         if len(set(coordinates)) != 2:
             raise Exception
 
-        adjacents = set(Board.next_adjacent(coordinates[0]))
+        adjacents = set(board.Board.next_adjacent(coordinates[0]))
 
         if coordinates[1] not in adjacents:
             raise Exception
 
     def __str__(self):
-        return f'Двухпалубник ${self.__coordinates}'
+        return f'Двухпалубник {self.get_coordinates()}'
 
 class ShipThree(Ship):
     def check_create(self, coordinates: list):
         if len(set(coordinates)) != 3:
             raise Exception
 
-        for adjacents in Board.next_two_adjacent(coordinates[0]):
+        for adjacents in board.Board.next_two_adjacent(coordinates[0]):
             if coordinates[1] in adjacents and coordinates[2] in adjacents:
                 return
 
-        for adjacents in Board.next_two_adjacent(coordinates[1]):
+        for adjacents in board.Board.next_two_adjacent(coordinates[1]):
             if coordinates[0] in adjacents and coordinates[2] in adjacents:
                 return
 
-        for adjacents in Board.next_two_adjacent(coordinates[2]):
+        for adjacents in board.Board.next_two_adjacent(coordinates[2]):
             if coordinates[0] in adjacents and coordinates[1] in adjacents:
                 return
 
         raise Exception
 
     def __str__(self):
-        return f'Трехпалубник ${self.__coordinates}'
+        return f'Трехпалубник {self.get_coordinates()}'
 
 
 if __name__ == "__main__":
@@ -104,7 +104,7 @@ if __name__ == "__main__":
     print(s2.set_his((0, 1)))
 
     s7 = ShipThree([(5, 6), (4, 6), (3, 6)])
-    s8 = ShipThree([(5, 6), (4, 6), (1, 6)])
+    #s8 = ShipThree([(5, 6), (4, 6), (1, 6)])
 
     # t1 = s1.get_adjacent()
     # t3 = s3.get_adjacent()

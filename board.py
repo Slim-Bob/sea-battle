@@ -212,3 +212,11 @@ if __name__ == "__main__":
 
     board.hit((0, 0))
     board.print()
+
+    print("---")
+
+    board.hit((1, 2))
+    board.print()
+    print("---")
+    for kill_ship in board.kills:
+        print(kill_ship)
