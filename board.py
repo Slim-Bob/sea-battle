@@ -132,9 +132,8 @@ class Board:
             for x in range(Board.MAX_WIDTH):
                 yield self._board[y][x]
 
-    def next_line(self):
-        for y in range(Board.MAX_HEIGHT):
-            yield self._board[y]
+    def next_line(self, y: int):
+        return self._board[y]
 
     def check_ships(self, ships: list(ship.Ship)) -> bool:
         adjacents_board = set()
