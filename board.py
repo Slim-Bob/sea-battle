@@ -14,10 +14,22 @@ class Board:
     _board = []
     _count_ship_one = 0
     _count_ship_two = 0
-    _count_ship_tree = 0
+    _count_ship_three = 0
 
     _ships = []
     _kill_ships = []
+
+    @property
+    def count_ship_one(self):
+        return self._count_ship_one
+
+    @property
+    def count_ship_two(self):
+        return self._count_ship_two
+
+    @property
+    def count_ship_three(self):
+        return self._count_ship_three
 
     def generate_ships(self):
         pass
@@ -136,10 +148,9 @@ class Board:
                     adjacents = adjacents.union(shp.get_coordinates())
 
             adjacents = adjacents.union(adjacents_board)
-            coordinates = check_shp.get_coordinates()
-
-            if adjacents.issuperset(coordinates):
-                return False
+            for coordinate in check_shp.get_coordinates():
+                if coordinate in adjacents:
+                    return False
 
         return True
 
@@ -176,7 +187,7 @@ class Board:
             yield adjacent
 
     @staticmethod
-    def next_two_adjacent(coordinate: tuple) -> set:
+    def next_two_adjacent(coordinate: tuple) -> set(tuple):
 
         adjacent1 = (coordinate[0] - 1, coordinate[1])
         adjacent2 = (coordinate[0] - 2, coordinate[1])
@@ -201,7 +212,15 @@ class Board:
 
 if __name__ == "__main__":
     board = Board()
-    ships = [ship.ShipTwo([(0, 0), (0, 1)]), ship.ShipOne([(1, 2)])]
+    #ships = [ship.ShipTwo([(0, 0), (0, 1)]), ship.ShipOne([(1, 2)])]
+    #ships = [ship.ShipTwo([(0, 0), (0, 1)])]
+    ships = [ship.ShipThree([(1, 4), (2, 4), (3, 4)])]
+    try:
+        board.set_ships(ships)
+    except Exception:
+        pass
+
+    ships = [ship.ShipTwo([(3, 5), (4, 5)])]
     try:
         board.set_ships(ships)
     except Exception:

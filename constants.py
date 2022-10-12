@@ -11,4 +11,4 @@ class CellStatus(Enum):
     EMPTY = '0'
     MISS = 'T'
     HIT = 'X'
-    SHIP = '1'
+    SHIP = '◻'
