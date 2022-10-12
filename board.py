@@ -101,9 +101,9 @@ class Board:
             raise Exception
 
     def check_count_ships(self) -> bool:
-        return all([self._count_ship_one != Board.COUNT_SHIP_ONE,
-                    self._count_ship_two != Board.COUNT_SHIP_TWO,
-                    self._count_ship_three != Board.COUNT_SHIP_THREE])
+        return all([self._count_ship_one == Board.COUNT_SHIP_ONE,
+                    self._count_ship_two == Board.COUNT_SHIP_TWO,
+                    self._count_ship_three == Board.COUNT_SHIP_THREE])
 
     def __init__(self):
         self._board = [[CellStatus.EMPTY for y in range(Board.MAX_HEIGHT)] for x in range(Board.MAX_WIDTH)]
@@ -111,7 +111,11 @@ class Board:
 
     def change_cell(self, coordinate: tuple, val: CellStatus):
         if self.check_coordinate(coordinate):
-            self._board[coordinate[0]][coordinate[1]] = val
+            try:
+                self._board[coordinate[0]][coordinate[1]] = val
+            except Exception:
+                print(coordinate)
+                self.print()
 
     def get_empty_cells(self) -> list(tuple):
         empty = []
@@ -160,9 +164,9 @@ class Board:
             raise Exception
 
         if all([coordinate[0] >= 0,
-                coordinate[0] <= Board.MAX_HEIGHT,
+                coordinate[0] < Board.MAX_HEIGHT,
                 coordinate[1] >= 0,
-                coordinate[1] <= Board.MAX_WIDTH]):
+                coordinate[1] < Board.MAX_WIDTH]):
             return True
         else:
             return False

@@ -1,7 +1,6 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
-from enum import Enum
-from constants import HitStatus, CellStatus
+from constants import HitStatus
 
 
 class Player(ABC):
